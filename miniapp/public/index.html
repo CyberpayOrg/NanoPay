@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>CyberNanoPay</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card: #111111;
+      --secondary: #1a1a1a;
+      --border: #222222;
+      --text: #ffffff;
+      --muted: #9ca3af;
+      --primary: #fee7a0;
+      --primary-fg: #0a0a0a;
+      --green: #34d399;
+      --red: #f87171;
+      --orange: #fbbf24;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: 40px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Header ── */
+    .header {
+      padding: 20px 20px 24px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -120px; left: 50%; transform: translateX(-50%);
+      width: 500px; height: 300px;
+      background: radial-gradient(ellipse, rgba(254,231,160,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .logo {
+      display: flex; align-items: center; justify-content: center;
+      gap: 6px; margin-bottom: 20px; position: relative;
+    }
+    .logo-text {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 16px; font-weight: 700; color: var(--text);
+    }
+    .logo-text span { color: var(--primary); }
+    .balance-label {
+      font-size: 12px; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.1em;
+      margin-bottom: 6px;
+    }
+    .balance-value {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 40px; font-weight: 800;
+      background: linear-gradient(135deg, #fee7a0 0%, #ffffff 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; letter-spacing: -1.5px;
+    }
+    .balance-unit {
+      font-size: 12px; color: var(--muted); margin-top: 2px;
+    }
+
+    /* ── Action buttons ── */
+    .actions {
+      display: flex; gap: 10px; padding: 0 20px 16px;
+    }
+    .btn-primary {
+      flex: 1; padding: 13px; border: none; border-radius: 24px;
+      background: var(--primary); color: var(--primary-fg);
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: opacity 0.2s;
+    }
+    .btn-primary:active { opacity: 0.8; }
+    .btn-secondary {
+      flex: 1; padding: 13px; border: 1px solid var(--border); border-radius: 24px;
+      background: transparent; color: var(--text);
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: background 0.2s;
+    }
+    .btn-secondary:active { background: var(--secondary); }
+
+    /* ── Stats cards ── */
+    .stats {
+      display: flex; gap: 8px; padding: 0 20px 16px;
+    }
+    .stat-card {
+      flex: 1; padding: 12px; border-radius: 12px;
+      background: var(--card); border: 1px solid var(--border);
+    }
+    .stat-label {
+      font-size: 10px; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .stat-value {
+      font-size: 17px; font-weight: 700; margin-top: 4px;
+      color: var(--text);
+    }
+
+    /* ── Approvals ── */
+    .approvals-section { padding: 0 20px 16px; }
+    .section-title {
+      font-size: 12px; font-weight: 600; color: var(--orange);
+      text-transform: uppercase; letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+    .approval-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px; margin-bottom: 8px;
+      border-left: 3px solid var(--orange);
+    }
+    .approval-btn {
+      padding: 7px 18px; border: none; border-radius: 20px;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      font-family: 'Inter', sans-serif; margin-right: 8px;
+    }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex; padding: 0 20px; gap: 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .tab {
+      flex: 1; padding: 11px; border: none; background: none;
+      color: var(--muted); font-size: 13px; font-weight: 600;
+      cursor: pointer; border-bottom: 2px solid transparent;
+      font-family: 'Inter', sans-serif;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .tab.active {
+      color: var(--primary); border-bottom-color: var(--primary);
+    }
+
+    /* ── Transaction list ── */
+    .tx-list { padding: 8px 20px; }
+    .tx-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .tx-item:last-child { border-bottom: none; }
+    .tx-empty {
+      text-align: center; color: var(--muted);
+      padding: 40px 0; font-size: 14px;
+    }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7); z-index: 100;
+      align-items: flex-end; justify-content: center;
+    }
+    .modal-sheet {
+      width: 100%; max-width: 480px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 20px 20px 0 0;
+      padding: 28px 20px 36px;
+      animation: slideUp 0.25s ease-out;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+    .modal-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 20px; font-weight: 700; margin-bottom: 20px;
+      text-align: center;
+    }
+    .input-label {
+      font-size: 11px; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.05em;
+      margin-bottom: 6px; display: block;
+    }
+    .input-field {
+      width: 100%; padding: 13px 16px; border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--bg); color: var(--text);
+      font-size: 16px; font-family: 'Inter', sans-serif;
+      margin-bottom: 14px; outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-field:focus { border-color: var(--primary); }
+    .modal-submit {
+      width: 100%; padding: 14px; border: none; border-radius: 24px;
+      background: var(--primary); color: var(--primary-fg);
+      font-size: 16px; font-weight: 600; cursor: pointer;
+      font-family: 'Inter', sans-serif; margin-top: 4px;
+    }
+    .modal-submit:active { opacity: 0.8; }
+    .modal-hint {
+      font-size: 11px; color: var(--muted);
+      text-align: center; margin-top: 14px; line-height: 1.5;
+    }
+    .quick-amounts {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      justify-content: center; margin-bottom: 18px;
+    }
+    .quick-btn {
+      padding: 8px 18px; border-radius: 20px;
+      border: 1px solid var(--border);
+      background: none; color: var(--text);
+      font-size: 14px; cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+    }
+    .quick-btn:hover, .quick-btn.active {
+      background: var(--primary); color: var(--primary-fg);
+      border-color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">
+      <div class="logo-text"><span>Cyber</span>Gateway</div>
+    </div>
+    <div class="balance-label">Available Balance</div>
+    <div id="balance" class="balance-value">--</div>
+    <div class="balance-unit">USDT</div>
+  </div>
+
+  <!-- Actions -->
+  <div class="actions">
+    <button class="btn-primary" onclick="showTopUp()">↑ Top Up</button>
+    <button class="btn-secondary" onclick="showPolicy()">⚙ Limits</button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-label">Daily Spent</div>
+      <div id="daily-spent" class="stat-value">--</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Daily Cap</div>
+      <div id="daily-cap" class="stat-value">--</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Per-Pay Limit</div>
+      <div id="spending-limit" class="stat-value">--</div>
+    </div>
+  </div>
+
+  <!-- Pending Approvals -->
+  <div id="approvals-section" class="approvals-section" style="display:none;">
+    <div class="section-title">⏳ Pending Approvals</div>
+    <div id="approvals-list"></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" data-tab="payments" onclick="switchTab('payments')">Payments</button>
+    <button class="tab" data-tab="deposits" onclick="switchTab('deposits')">Deposits</button>
+  </div>
+
+  <!-- Transaction List -->
+  <div id="tx-list" class="tx-list"></div>
+
+  <!-- Modal -->
+  <div id="modal" class="modal-overlay">
+    <div id="modal-content" class="modal-sheet"></div>
+  </div>
+
+<script>
+// ── Telegram WebApp ──
+const tg = window.Telegram?.WebApp;
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.setHeaderColor('#0a0a0a');
+  tg.setBackgroundColor('#0a0a0a');
+}
+
+const API_BASE = '';
+let currentAddress = '';
+let currentTab = 'payments';
+
+function getAddress() {
+  if (tg?.initDataUnsafe?.start_param) return tg.initDataUnsafe.start_param;
+  const urlAddr = new URLSearchParams(location.search).get('address');
+  if (urlAddr) return urlAddr;
+  return prompt('Enter your TON address (dev mode):') || 'test_user_1';
+}
+
+async function api(path, opts = {}) {
+  const headers = {
+    'Content-Type': 'application/json',
+    'X-Address': currentAddress,
+    ...(tg?.initData ? { 'X-Telegram-Init-Data': tg.initData } : {}),
+  };
+  const res = await fetch(API_BASE + path, { ...opts, headers: { ...headers, ...opts.headers } });
+  return res.json();
+}
+
+function fmt(raw) {
+  if (!raw || raw === '0') return '0.00';
+  const n = BigInt(raw);
+  const w = n / 1000000n;
+  const f = (n % 1000000n).toString().padStart(6, '0').slice(0, 2);
+  return `${w}.${f}`;
+}
+
+function fmtTime(ts) {
+  const d = new Date(ts);
+  const now = new Date();
+  if (d.toDateString() === now.toDateString())
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+}
+
+function short(addr) {
+  if (!addr || addr.length < 12) return addr || '--';
+  return addr.slice(0, 6) + '…' + addr.slice(-4);
+}
+
+// ── Load data ──
+async function loadAccount() {
+  const d = await api('/api/account');
+  document.getElementById('balance').textContent = fmt(d.available);
+  document.getElementById('daily-spent').textContent = fmt(d.dailySpent);
+  document.getElementById('daily-cap').textContent =
+    !d.policy?.dailyCap || d.policy.dailyCap === '0' ? '∞' : fmt(d.policy.dailyCap);
+  document.getElementById('spending-limit').textContent =
+    !d.policy?.spendingLimit || d.policy.spendingLimit === '0' ? '∞' : fmt(d.policy.spendingLimit);
+}
+
+async function loadApprovals() {
+  const d = await api('/api/approvals');
+  const sec = document.getElementById('approvals-section');
+  const list = document.getElementById('approvals-list');
+  if (!d.approvals?.length) { sec.style.display = 'none'; return; }
+  sec.style.display = 'block';
+  list.innerHTML = d.approvals.map(a => `
+    <div class="approval-card">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+        <span style="font-size:14px;font-weight:600;">${fmt(a.amount)} USDT</span>
+        <span style="font-size:11px;color:var(--muted);">${fmtTime(a.requestedAt)}</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">
+        ${short(a.from)} → ${short(a.to)}
+      </div>
+      <div>
+        <button class="approval-btn" style="background:var(--green);color:#000;"
+          onclick="doApproval('${a.paymentId}',true)">✓ Approve</button>
+        <button class="approval-btn" style="background:var(--red);color:#fff;"
+          onclick="doApproval('${a.paymentId}',false)">✕ Reject</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function doApproval(id, approve) {
+  const r = await api(`/api/${approve ? 'approve' : 'reject'}/${id}`, { method: 'POST' });
+  if (r.success) {
+    tg?.showAlert(approve ? 'Payment approved ✓' : 'Payment rejected ✕');
+    loadApprovals(); loadAccount();
+  } else {
+    tg?.showAlert('Error: ' + (r.error || 'Failed'));
+  }
+}
+
+async function loadPayments() {
+  const d = await api('/api/history');
+  renderTx(d.payments || [], 'payment');
+}
+
+async function loadDeposits() {
+  const d = await api('/api/deposits');
+  renderTx(d.deposits || [], 'deposit');
+}
+
+function renderTx(items, type) {
+  const el = document.getElementById('tx-list');
+  if (!items.length) {
+    el.innerHTML = `<div class="tx-empty">No ${type}s yet</div>`;
+    return;
+  }
+  el.innerHTML = items.map(item => {
+    if (type === 'payment') {
+      const out = item.from_addr === currentAddress;
+      return `<div class="tx-item">
+        <div>
+          <div style="font-size:14px;font-weight:500;">
+            ${out ? '↗' : '↙'} ${short(out ? item.to_addr : item.from_addr)}
+          </div>
+          <div style="font-size:11px;color:var(--muted);">${fmtTime(item.created_at)}</div>
+        </div>
+        <div style="font-size:15px;font-weight:600;color:${out ? 'var(--red)' : 'var(--green)'};">
+          ${out ? '-' : '+'}${fmt(item.amount)}
+        </div>
+      </div>`;
+    }
+    return `<div class="tx-item">
+      <div>
+        <div style="font-size:14px;font-weight:500;">↑ Top Up</div>
+        <div style="font-size:11px;color:var(--muted);">${fmtTime(item.created_at)}</div>
+      </div>
+      <div style="font-size:15px;font-weight:600;color:var(--green);">+${fmt(item.amount)}</div>
+    </div>`;
+  }).join('');
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === tab);
+  });
+  tab === 'payments' ? loadPayments() : loadDeposits();
+}
+
+// ── Modals ──
+function showModal(html) {
+  const m = document.getElementById('modal');
+  document.getElementById('modal-content').innerHTML = html;
+  m.style.display = 'flex';
+  m.onclick = e => { if (e.target === m) closeModal(); };
+}
+function closeModal() { document.getElementById('modal').style.display = 'none'; }
+
+function showTopUp() {
+  showModal(`
+    <div class="modal-title">↑ Top Up</div>
+    <div class="quick-amounts">
+      ${[1,5,10,50,100].map(a =>
+        `<button class="quick-btn" onclick="pickAmount(this,${a})">${a} USDT</button>`
+      ).join('')}
+    </div>
+    <label class="input-label">Custom amount (USDT)</label>
+    <input id="topup-input" class="input-field" type="number" placeholder="0.00" step="0.01" min="0.01">
+    <button class="modal-submit" onclick="doTopUp()">Confirm Top Up</button>
+    <div class="modal-hint">
+      Sends USDT to CyberNanoPay contract.<br>Funds available instantly for payments.
+    </div>
+  `);
+}
+
+function pickAmount(el, n) {
+  document.getElementById('topup-input').value = n;
+  document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+async function doTopUp() {
+  const v = parseFloat(document.getElementById('topup-input').value);
+  if (!v || v <= 0) { tg?.showAlert('Enter a valid amount'); return; }
+  const raw = Math.round(v * 1e6).toString();
+  const r = await api('/api/topup', { method: 'POST', body: JSON.stringify({ amount: raw }) });
+  if (r.success) {
+    closeModal();
+    tg?.showAlert(`Topped up ${v} USDT ✓`);
+    loadAccount();
+    if (currentTab === 'deposits') loadDeposits();
+  } else {
+    tg?.showAlert('Error: ' + (r.error || 'Failed'));
+  }
+}
+
+function showPolicy() {
+  showModal(`
+    <div class="modal-title">⚙ Spending Limits</div>
+    <label class="input-label">Per-payment limit (USDT, 0 = unlimited)</label>
+    <input id="p-limit" class="input-field" type="number" placeholder="0.00" step="0.01" min="0">
+    <label class="input-label">Daily cap (USDT, 0 = unlimited)</label>
+    <input id="p-cap" class="input-field" type="number" placeholder="0.00" step="0.01" min="0">
+    <label class="input-label">HITL threshold (USDT, 0 = no approval)</label>
+    <input id="p-hitl" class="input-field" type="number" placeholder="0.00" step="0.01" min="0">
+    <button class="modal-submit" onclick="doPolicy()">Save Limits</button>
+    <div class="modal-hint">
+      Payments above HITL threshold require<br>your manual approval via Telegram.
+    </div>
+  `);
+  api('/api/account').then(d => {
+    if (!d.policy) return;
+    const s = (id, v) => { if (v !== '0') document.getElementById(id).value = (parseInt(v)/1e6).toString(); };
+    s('p-limit', d.policy.spendingLimit);
+    s('p-cap', d.policy.dailyCap);
+    s('p-hitl', d.policy.hitlThreshold);
+  });
+}
+
+async function doPolicy() {
+  const r = (id) => Math.round((parseFloat(document.getElementById(id).value)||0)*1e6).toString();
+  const res = await api('/api/policy', {
+    method: 'POST',
+    body: JSON.stringify({ spendingLimit: r('p-limit'), dailyCap: r('p-cap'), hitlThreshold: r('p-hitl') }),
+  });
+  if (res.success) { closeModal(); tg?.showAlert('Limits updated ✓'); loadAccount(); }
+  else tg?.showAlert('Error: ' + (res.error || 'Failed'));
+}
+
+// ── Init ──
+async function init() {
+  currentAddress = getAddress();
+  await Promise.all([loadAccount(), loadApprovals(), loadPayments()]);
+  setInterval(() => {
+    loadAccount(); loadApprovals();
+    currentTab === 'payments' ? loadPayments() : loadDeposits();
+  }, 15000);
+}
+init();
+</script>
+</body>
+</html>

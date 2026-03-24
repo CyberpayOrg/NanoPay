@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1200, height=630">
+<title>CyberNanoPay Cover</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1200px;
+    height: 630px;
+    background: #09090b;
+    font-family: 'Inter', -apple-system, sans-serif;
+    overflow: hidden;
+    position: relative;
+    color: #fff;
+  }
+
+  /* Subtle radial glow */
+  .bg-glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(234, 179, 8, 0.06) 0%, transparent 70%);
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 50%;
+  }
+
+  .bg-glow-2 {
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(234, 179, 8, 0.04) 0%, transparent 70%);
+    bottom: -100px;
+    right: 100px;
+    border-radius: 50%;
+  }
+
+  .content {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0 80px;
+  }
+
+  /* Logo */
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+
+  .logo-cyber {
+    font-size: 26px;
+    font-weight: 800;
+    color: #eab308;
+    letter-spacing: -0.5px;
+  }
+
+  .logo-nano {
+    font-size: 26px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.5px;
+  }
+
+  /* Tag line */
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 28px;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .tag-dot {
+    width: 8px;
+    height: 8px;
+    background: #eab308;
+    border-radius: 50%;
+  }
+
+  /* Main title */
+  .title {
+    font-size: 56px;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -2px;
+    margin-bottom: 20px;
+  }
+
+  .title-gold {
+    color: #eab308;
+  }
+
+  /* Subtitle */
+  .subtitle {
+    font-size: 16px;
+    color: rgba(255,255,255,0.45);
+    line-height: 1.6;
+    max-width: 600px;
+    margin-bottom: 36px;
+  }
+
+  /* Stats row */
+  .stats {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 36px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 1px;
+  }
+
+  .stats span {
+    color: rgba(255,255,255,0.7);
+  }
+
+  .stats-sep {
+    color: rgba(255,255,255,0.15);
+  }
+
+  /* Flow steps */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-width: 130px;
+  }
+
+  .step-box {
+    width: 52px;
+    height: 52px;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.03);
+  }
+
+  .step-box svg {
+    width: 24px;
+    height: 24px;
+    stroke: rgba(255,255,255,0.5);
+    fill: none;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .step-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #eab308;
+    letter-spacing: 1px;
+  }
+
+  .step-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  .step-desc {
+    font-size: 11px;
+    color: rgba(255,255,255,0.3);
+    max-width: 120px;
+  }
+
+  .arrow {
+    color: rgba(255,255,255,0.12);
+    font-size: 20px;
+    margin: 0 6px;
+    margin-bottom: 40px;
+  }
+
+  /* Bottom tech tags */
+  .bottom-bar {
+    position: absolute;
+    bottom: 28px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+  <div class="bg-glow"></div>
+  <div class="bg-glow-2"></div>
+
+  <div class="content">
+    <!-- Logo -->
+    <div class="logo">
+      <span class="logo-cyber">Cybernano</span><span class="logo-nano">Pay</span>
+    </div>
+
+    <!-- Tag -->
+    <div class="tag">
+      <div class="tag-dot"></div>
+      Nanopayment Infrastructure for AI Agents
+    </div>
+
+    <!-- Title -->
+    <div class="title">
+      Let AI Agents Pay<br>
+      <span class="title-gold">Gas-Free on TON</span>
+    </div>
+
+    <!-- Subtitle -->
+    <div class="subtitle">
+      Sub-cent USDT micropayments via offchain Ed25519 signatures,
+      Phala TEE aggregation, and on-chain batch settlement — one platform
+      for complete agent payment capabilities.
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <span>x402 Protocol</span>
+      <span class="stats-sep">·</span>
+      <span>Phala TEE</span>
+      <span class="stats-sep">·</span>
+      <span>Tact Contract</span>
+      <span class="stats-sep">·</span>
+      <span>Telegram HITL</span>
+      <span class="stats-sep">·</span>
+      <span>Bilateral Netting</span>
+    </div>
+
+    <!-- Flow -->
+    <div class="flow">
+      <div class="step">
+        <div class="step-box">
+          <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-9 9m9-9a9 9 0 0 0-9-9m9 9H3m9 9a9 9 0 0 1-9-9m9 9c1.66 0 3-4.03 3-9s-1.34-9-3-9m0 18c-1.66 0-3-4.03-3-9s1.34-9 3-9m-9 9a9 9 0 0 1 9-9"/></svg>
+        </div>
+        <div class="step-num">01</div>
+        <div class="step-label">Deposit</div>
+        <div class="step-desc">USDT to contract once</div>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="step">
+        <div class="step-box">
+          <svg viewBox="0 0 24 24"><path d="M15.5 2H8.6c-.4 0-.8.2-1.1.5-.3.3-.5.7-.5 1.1v16.8c0 .4.2.8.5 1.1.3.3.7.5 1.1.5h6.9c.4 0 .8-.2 1.1-.5.3-.3.5-.7.5-1.1V3.6c0-.4-.2-.8-.5-1.1-.3-.3-.7-.5-1.1-.5z"/><path d="M12 18h.01"/></svg>
+        </div>
+        <div class="step-num">02</div>
+        <div class="step-label">Sign Offchain</div>
+        <div class="step-desc">Ed25519, zero gas</div>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="step">
+        <div class="step-box">
+          <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <div class="step-num">03</div>
+        <div class="step-label">TEE Verify</div>
+        <div class="step-desc">Phala TEE ~1ms</div>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="step">
+        <div class="step-box">
+          <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </div>
+        <div class="step-num">04</div>
+        <div class="step-label">Batch Settle</div>
+        <div class="step-desc">On-chain, netting</div>
+      </div>
+
+      <div class="arrow">→</div>
+
+      <div class="step">
+        <div class="step-box">
+          <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.81.36 1.6.68 2.34a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.74.32 1.53.55 2.34.68A2 2 0 0 1 22 16.92z"/></svg>
+        </div>
+        <div class="step-num">05</div>
+        <div class="step-label">HITL Safety</div>
+        <div class="step-desc">Telegram approval</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom -->
+  <div class="bottom-bar">
+    <span>Tact</span>
+    <span>Phala TEE</span>
+    <span>Ed25519</span>
+    <span>x402</span>
+    <span>grammY</span>
+    <span>Hono</span>
+    <span>SQLite</span>
+  </div>
+</body>
+</html>

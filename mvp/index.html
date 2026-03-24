@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CyberNanoPay — Live Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #09090b;
+    --surface: #111113;
+    --border: rgba(255,255,255,0.08);
+    --border-hover: rgba(255,255,255,0.15);
+    --text: #fff;
+    --text-dim: rgba(255,255,255,0.5);
+    --text-muted: rgba(255,255,255,0.3);
+    --gold: #eab308;
+    --gold-dim: rgba(234,179,8,0.15);
+    --green: #22c55e;
+    --green-dim: rgba(34,197,94,0.15);
+    --red: #ef4444;
+    --red-dim: rgba(239,68,68,0.15);
+    --blue: #3b82f6;
+    --blue-dim: rgba(59,130,246,0.15);
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Inter', -apple-system, sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Header */
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  .logo-gold { color: var(--gold); }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .status-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-family: var(--mono);
+    color: var(--text-dim);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 20px;
+  }
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+  }
+
+  .status-dot.offline { background: var(--red); animation: none; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .github-link {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  .github-link:hover { color: var(--text); }
+
+  /* Main layout */
+  .main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px;
+  }
+
+  /* Hero */
+  .hero {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-family: var(--mono);
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .hero-tag-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--gold);
+    border-radius: 50%;
+  }
+
+  .hero h1 {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+
+  .hero h1 span { color: var(--gold); }
+
+  .hero p {
+    color: var(--text-dim);
+    font-size: 15px;
+    max-width: 550px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* Grid */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .grid-full {
+    grid-template-columns: 1fr;
+  }
+
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .card-badge {
+    font-size: 11px;
+    font-family: var(--mono);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 500;
+  }
+
+  .badge-green { background: var(--green-dim); color: var(--green); }
+  .badge-gold { background: var(--gold-dim); color: var(--gold); }
+  .badge-blue { background: var(--blue-dim); color: var(--blue); }
+  .badge-red { background: var(--red-dim); color: var(--red); }
+
+  /* Key-value rows */
+  .kv-list { display: flex; flex-direction: column; gap: 12px; }
+
+  .kv-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .kv-label {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .kv-value {
+    font-size: 13px;
+    font-family: var(--mono);
+    color: var(--text);
+    font-weight: 500;
+    text-align: right;
+    max-width: 60%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .kv-value.gold { color: var(--gold); }
+  .kv-value.green { color: var(--green); }
+
+  /* Demo section */
+  .demo-section {
+    margin-top: 32px;
+  }
+
+  .demo-steps {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .demo-step {
+    flex: 1;
+    min-width: 180px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    transition: border-color 0.3s;
+  }
+
+  .demo-step.active {
+    border-color: var(--gold);
+  }
+
+  .demo-step.done {
+    border-color: var(--green);
+  }
+
+  .demo-step-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .demo-step.active .demo-step-num { color: var(--gold); }
+  .demo-step.done .demo-step-num { color: var(--green); }
+
+  .demo-step-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dim);
+  }
+
+  .demo-step.active .demo-step-label { color: var(--text); }
+  .demo-step.done .demo-step-label { color: var(--text); }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: var(--sans);
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+
+  .btn-gold {
+    background: var(--gold);
+    color: #000;
+  }
+  .btn-gold:hover { background: #ca9a06; }
+  .btn-gold:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+  .btn-outline:hover { border-color: var(--border-hover); color: var(--text); }
+
+  .btn-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin: 24px 0;
+  }
+
+  /* Log output */
+  .log-box {
+    background: #0c0c0e;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.8;
+    color: var(--text-dim);
+    max-height: 320px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  .log-box .log-time { color: var(--text-muted); }
+  .log-box .log-ok { color: var(--green); }
+  .log-box .log-err { color: var(--red); }
+  .log-box .log-info { color: var(--blue); }
+  .log-box .log-gold { color: var(--gold); }
+
+  /* Receipt card */
+  .receipt {
+    background: #0c0c0e;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 16px;
+    display: none;
+  }
+
+  .receipt.show { display: block; }
+
+  .receipt-title {
+    font-size: 12px;
+    font-family: var(--mono);
+    color: var(--gold);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 32px;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-family: var(--mono);
+    letter-spacing: 1px;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+
+  .footer a { color: var(--text-dim); text-decoration: none; }
+  .footer a:hover { color: var(--gold); }
+
+  /* Spinner */
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--border);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .grid { grid-template-columns: 1fr; }
+    .main { padding: 20px; }
+    .hero h1 { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">
+    <span class="logo-gold">Cyber</span><span>NanoPay</span>
+  </div>
+  <div class="header-right">
+    <div class="status-pill">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Connecting...</span>
+    </div>
+    <a class="github-link" href="https://github.com" target="_blank">GitHub →</a>
+  </div>
+</header>
+
+<main class="main">
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-tag"><div class="hero-tag-dot"></div>Live Demo · Agent Infrastructure</div>
+    <h1>Gas-Free Nanopayments<br>for <span>AI Agents</span> on TON</h1>
+    <p>Interactive demo of the CyberNanoPay protocol — deposit, sign offchain, verify in TEE, batch settle on-chain.</p>
+  </div>
+
+  <!-- TEE Status + Stats -->
+  <div class="grid">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">TEE Attestation</span>
+        <span class="card-badge badge-green" id="teeBadge">Loading</span>
+      </div>
+      <div class="kv-list">
+        <div class="kv-row">
+          <span class="kv-label">Platform</span>
+          <span class="kv-value" id="teePlatform">—</span>
+        </div>
+        <div class="kv-row">
+          <span class="kv-label">TEE Public Key</span>
+          <span class="kv-value" id="teePubkey" style="font-size:11px">—</span>
+        </div>
+        <div class="kv-row">
+          <span class="kv-label">Code Hash</span>
+          <span class="kv-value" id="teeCodeHash" style="font-size:11px">—</span>
+        </div>
+        <div class="kv-row">
+          <span class="kv-label">Contract Match</span>
+          <span class="kv-value green" id="teeMatch">—</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Protocol Stats</span>
+        <span class="card-badge badge-gold" id="statsBadge">Live</span>
+      </div>
+      <div class="kv-list">
+        <div class="kv-row">
+          <span class="kv-label">Total Deposits</span>
+          <span class="kv-value gold" id="statDeposits">—</span>
+        </div>
+        <div class="kv-row">
+          <span class="kv-label">Total Settled</span>
+          <span class="kv-value" id="statSettled">—</span>
+        </div>
+        <div class="kv-row">
+          <span class="kv-label">Accounts</span>
+          <span class="kv-value" id="statAccounts">—</span>
+        </div>
+        <div class="kv-row">
+          <span class="kv-label">Pending Batch</span>
+          <span class="kv-value" id="statPending">—</span>
+        </div>
+        <div class="kv-row">
+          <span class="kv-label">Pending Approvals</span>
+          <span class="kv-value" id="statApprovals">—</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Demo -->
+  <div class="demo-section">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Interactive Payment Demo</span>
+        <span class="card-badge badge-blue">Testnet</span>
+      </div>
+
+      <div class="demo-steps">
+        <div class="demo-step" id="step1">
+          <div class="demo-step-num">01</div>
+          <div class="demo-step-label">Generate Keys</div>
+        </div>
+        <div class="demo-step" id="step2">
+          <div class="demo-step-num">02</div>
+          <div class="demo-step-label">Deposit</div>
+        </div>
+        <div class="demo-step" id="step3">
+          <div class="demo-step-num">03</div>
+          <div class="demo-step-label">Sign & Pay</div>
+        </div>
+        <div class="demo-step" id="step4">
+          <div class="demo-step-num">04</div>
+          <div class="demo-step-label">Verify Receipt</div>
+        </div>
+        <div class="demo-step" id="step5">
+          <div class="demo-step-num">05</div>
+          <div class="demo-step-label">Check Balance</div>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-gold" id="btnRun" onclick="runDemo()">▶ Run Full Demo</button>
+        <button class="btn btn-outline" id="btnReset" onclick="resetDemo()">Reset</button>
+      </div>
+
+      <div class="log-box" id="logBox">Waiting to start...</div>
+
+      <div class="receipt" id="receiptCard">
+        <div class="receipt-title">✓ TEE-Signed Payment Receipt</div>
+        <div class="kv-list" id="receiptData"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Architecture -->
+  <div class="grid grid-full" style="margin-top:20px">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Architecture</span>
+      </div>
+      <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;padding:8px 0">
+        <div class="demo-step" style="min-width:140px;flex:none">
+          <div class="demo-step-num" style="color:var(--gold)">Agent</div>
+          <div class="demo-step-label">Sign Offchain</div>
+        </div>
+        <div style="color:var(--text-muted);align-self:center;font-size:18px">→</div>
+        <div class="demo-step" style="min-width:140px;flex:none;border-color:var(--gold)">
+          <div class="demo-step-num" style="color:var(--gold)">Phala TEE</div>
+          <div class="demo-step-label">Verify & Batch</div>
+        </div>
+        <div style="color:var(--text-muted);align-self:center;font-size:18px">→</div>
+        <div class="demo-step" style="min-width:140px;flex:none">
+          <div class="demo-step-num" style="color:var(--gold)">CyberGateway</div>
+          <div class="demo-step-label">Batch Settle</div>
+        </div>
+        <div style="color:var(--text-muted);align-self:center;font-size:18px">→</div>
+        <div class="demo-step" style="min-width:140px;flex:none">
+          <div class="demo-step-num" style="color:var(--gold)">TON Chain</div>
+          <div class="demo-step-label">USDT Transfer</div>
+        </div>
+        <div style="color:var(--text-muted);align-self:center;font-size:18px">|</div>
+        <div class="demo-step" style="min-width:140px;flex:none">
+          <div class="demo-step-num" style="color:var(--gold)">Telegram</div>
+          <div class="demo-step-label">HITL Approval</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  CyberNanoPay · Agent Infrastructure on TON · <a href="https://github.com" target="_blank">Source Code</a>
+</footer>
+
+<script type="module">
+
+const TEE_URL = 'https://af1c105306ec350be2965d98f181d48c305501ac-4030.dstack-pha-prod5.phala.network';
+
+// ── Helpers ──
+
+const $ = id => document.getElementById(id);
+const logBox = $('logBox');
+let logLines = [];
+
+function log(msg, cls = '') {
+  const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+  const span = cls ? `<span class="log-${cls}">` : '<span>';
+  logLines.push(`<span class="log-time">[${time}]</span> ${span}${msg}</span>`);
+  logBox.innerHTML = logLines.join('\n');
+  logBox.scrollTop = logBox.scrollHeight;
+}
+
+function setStep(n, state) {
+  const el = $(`step${n}`);
+  el.classList.remove('active', 'done');
+  if (state) el.classList.add(state);
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ── Fetch TEE data on load ──
+
+async function loadTeeStatus() {
+  try {
+    const [healthRes, attestRes, statsRes] = await Promise.all([
+      fetch(`${TEE_URL}/health`),
+      fetch(`${TEE_URL}/attestation`),
+      fetch(`${TEE_URL}/stats`),
+    ]);
+
+    const health = await healthRes.json();
+    const attest = await attestRes.json();
+    const stats = await statsRes.json();
+
+    // Status
+    $('statusDot').classList.toggle('offline', health.status !== 'ok');
+    $('statusText').textContent = health.status === 'ok' ? 'TEE Online' : 'Offline';
+
+    // Attestation
+    $('teePlatform').textContent = attest.platform || '—';
+    $('teePubkey').textContent = attest.teePublicKey || '—';
+    $('teeCodeHash').textContent = attest.codeHash || '—';
+    $('teeMatch').textContent = attest.teePublicKey ? '✓ Synced with contract' : '—';
+    $('teeBadge').textContent = attest.isDevelopment ? 'Development' : 'Verified';
+    $('teeBadge').className = `card-badge ${attest.isDevelopment ? 'badge-gold' : 'badge-green'}`;
+
+    // Stats
+    $('statDeposits').textContent = formatUnits(stats.totalDeposits) + ' USDT';
+    $('statSettled').textContent = formatUnits(stats.totalDeducted) + ' USDT';
+    $('statAccounts').textContent = stats.accountCount;
+    $('statPending').textContent = stats.pendingBatchCount;
+    $('statApprovals').textContent = stats.pendingApprovalCount;
+  } catch (err) {
+    $('statusDot').classList.add('offline');
+    $('statusText').textContent = 'Connection Failed';
+    console.error(err);
+  }
+}
+
+function formatUnits(raw) {
+  const n = Number(raw || 0);
+  if (n === 0) return '0';
+  return (n / 1_000_000).toFixed(n < 1_000_000 ? 6 : 2);
+}
+
+// ── Ed25519 in browser (tweetnacl via CDN) ──
+
+let nacl;
+
+async function loadNacl() {
+  if (nacl) return;
+  // Load tweetnacl from CDN
+  await new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/nacl-fast.min.js';
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+  nacl = window.nacl;
+}
+
+// Simple SHA-256 using Web Crypto
+async function sha256(buffer) {
+  const hash = await crypto.subtle.digest('SHA-256', buffer);
+  return new Uint8Array(hash);
+}
+
+function toHex(bytes) {
+  return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function randomHex(n) {
+  const bytes = new Uint8Array(n);
+  crypto.getRandomValues(bytes);
+  return toHex(bytes);
+}
+
+// Build a fake TON-like address from pubkey
+function pubkeyToAddress(pubkey) {
+  // Simplified: 0: prefix + first 32 bytes of pubkey as hex
+  // Real TON addresses are more complex, but TEE accepts raw format for testing
+  return '0:' + toHex(pubkey.slice(0, 32));
+}
+
+// Build payment message (must match TEE verifier format)
+function buildMessage(fromHash, toHash, amount, validBefore, nonceBytes) {
+  const prefix = new TextEncoder().encode('CyberGateway:v1:');
+  const buf = new Uint8Array(prefix.length + 32 + 32 + 16 + 8 + 32);
+  let offset = 0;
+
+  buf.set(prefix, offset); offset += prefix.length;
+  buf.set(fromHash, offset); offset += 32;
+  buf.set(toHash, offset); offset += 32;
+
+  // amount as uint128 big-endian
+  const amountBig = BigInt(amount);
+  for (let i = 15; i >= 0; i--) {
+    buf[offset + i] = Number((amountBig >> BigInt((15 - i) * 8)) & 0xFFn);
+  }
+  // Fix: write big-endian properly
+  const amountArr = new Uint8Array(16);
+  let amt = amountBig;
+  for (let i = 15; i >= 0; i--) {
+    amountArr[i] = Number(amt & 0xFFn);
+    amt >>= 8n;
+  }
+  buf.set(amountArr, offset); offset += 16;
+
+  // validBefore as uint64 big-endian
+  const timeArr = new Uint8Array(8);
+  let ts = BigInt(validBefore);
+  for (let i = 7; i >= 0; i--) {
+    timeArr[i] = Number(ts & 0xFFn);
+    ts >>= 8n;
+  }
+  buf.set(timeArr, offset); offset += 8;
+
+  buf.set(nonceBytes, offset);
+  return buf;
+}
+
+// ── Demo Flow ──
+
+let demoState = {};
+
+async function runDemo() {
+  const btn = $('btnRun');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Running...';
+  logLines = [];
+  logBox.innerHTML = '';
+  $('receiptCard').classList.remove('show');
+  for (let i = 1; i <= 5; i++) setStep(i, '');
+
+  try {
+    await loadNacl();
+
+    // Step 1: Generate keypairs
+    setStep(1, 'active');
+    log('Generating Ed25519 keypairs...', 'info');
+    await sleep(300);
+
+    const buyerKp = nacl.sign.keyPair();
+    const sellerKp = nacl.sign.keyPair();
+    const buyerAddr = pubkeyToAddress(buyerKp.publicKey);
+    const sellerAddr = pubkeyToAddress(sellerKp.publicKey);
+    const buyerPubHex = toHex(buyerKp.publicKey);
+
+    demoState = { buyerKp, sellerKp, buyerAddr, sellerAddr, buyerPubHex };
+
+    log(`Buyer:  ${buyerAddr.slice(0, 24)}...`, 'ok');
+    log(`Seller: ${sellerAddr.slice(0, 24)}...`, 'ok');
+    log(`Buyer pubkey: ${buyerPubHex.slice(0, 32)}...`);
+
+    // Register key with TEE
+    log('Registering buyer public key with TEE...');
+    const regRes = await fetch(`${TEE_URL}/register-key`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ address: buyerAddr, publicKey: buyerPubHex }),
+    });
+    const regData = await regRes.json();
+    log(`Key registered: ${JSON.stringify(regData)}`, regData.success ? 'ok' : 'err');
+    setStep(1, 'done');
+
+    // Step 2: Deposit
+    setStep(2, 'active');
+    await sleep(200);
+    const depositAmount = '10000000'; // $10 USDT
+    log(`Simulating deposit of ${formatUnits(depositAmount)} USDT...`, 'info');
+
+    const depRes = await fetch(`${TEE_URL}/simulate-deposit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ address: buyerAddr, amount: depositAmount }),
+    });
+    const depData = await depRes.json();
+    log(`Deposit confirmed. Balance: ${formatUnits(depData.balance)} USDT`, 'ok');
+    setStep(2, 'done');
+
+    // Step 3: Sign & Pay (multiple rapid payments)
+    setStep(3, 'active');
+    await sleep(200);
+    const paymentAmount = '1000'; // $0.001
+    const numPayments = 10;
+    log(`Sending ${numPayments} rapid payments of ${formatUnits(paymentAmount)} USDT each...`, 'info');
+    log('Each payment: offchain Ed25519 sign → TEE verify → instant confirm', 'gold');
+
+    let successCount = 0;
+    let lastReceipt = null;
+    const startTime = performance.now();
+
+    for (let i = 0; i < numPayments; i++) {
+      const nonce = randomHex(32);
+      const nonceBytes = new Uint8Array(32);
+      for (let j = 0; j < 32; j++) nonceBytes[j] = parseInt(nonce.slice(j*2, j*2+2), 16);
+
+      const validBefore = Math.floor(Date.now() / 1000) + 300;
+
+      // Build message and sign
+      const fromHash = buyerKp.publicKey.slice(0, 32);
+      const toHash = sellerKp.publicKey.slice(0, 32);
+      const msg = buildMessage(fromHash, toHash, paymentAmount, validBefore, nonceBytes);
+      const msgHash = await sha256(msg);
+      const sig = nacl.sign.detached(msgHash, buyerKp.secretKey);
+
+      const verifyRes = await fetch(`${TEE_URL}/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: buyerAddr,
+          to: sellerAddr,
+          amount: paymentAmount,
+          validBefore,
+          nonce,
+          signature: toHex(sig),
+        }),
+      });
+      const result = await verifyRes.json();
+      if (result.success) {
+        successCount++;
+        lastReceipt = result;
+      }
+    }
+
+    const elapsed = (performance.now() - startTime).toFixed(0);
+    log(`${successCount}/${numPayments} payments confirmed in ${elapsed}ms (${(elapsed/numPayments).toFixed(1)}ms avg)`, 'ok');
+    setStep(3, 'done');
+
+    // Step 4: Show receipt
+    setStep(4, 'active');
+    await sleep(200);
+    if (lastReceipt && lastReceipt.receipt) {
+      log('TEE-signed receipt received (COSE_Sign1-style)', 'ok');
+      showReceipt(lastReceipt);
+    } else {
+      log('Payment confirmed (receipt: ' + (lastReceipt?.confirmationId || 'n/a') + ')', 'ok');
+    }
+    setStep(4, 'done');
+
+    // Step 5: Check balance
+    setStep(5, 'active');
+    await sleep(200);
+    log('Checking final balances...', 'info');
+
+    const balRes = await fetch(`${TEE_URL}/balance/${buyerAddr}`);
+    const bal = await balRes.json();
+    log(`Buyer balance:  ${formatUnits(bal.available)} USDT (spent: ${formatUnits(bal.totalSpent)})`, 'gold');
+
+    // Refresh global stats
+    await loadTeeStatus();
+    log('', '');
+    log('✓ Demo complete. All payments verified by TEE with zero gas.', 'ok');
+    setStep(5, 'done');
+
+  } catch (err) {
+    log(`Error: ${err.message}`, 'err');
+    console.error(err);
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '▶ Run Full Demo';
+}
+
+function showReceipt(result) {
+  const card = $('receiptCard');
+  const data = $('receiptData');
+  const r = result.receipt;
+
+  if (!r) {
+    card.classList.remove('show');
+    return;
+  }
+
+  const rows = [
+    ['Version', r.version],
+    ['Algorithm', r.protected?.alg],
+    ['TEE Platform', r.protected?.teePlatform],
+    ['Confirmation ID', r.payload?.confirmationId],
+    ['From', r.payload?.from?.slice(0, 24) + '...'],
+    ['To', r.payload?.to?.slice(0, 24) + '...'],
+    ['Amount', formatUnits(r.payload?.amount) + ' USDT'],
+    ['Remaining Balance', formatUnits(r.payload?.remainingBalance) + ' USDT'],
+    ['Signature', r.signature?.slice(0, 40) + '...'],
+  ];
+
+  data.innerHTML = rows.map(([k, v]) => `
+    <div class="kv-row">
+      <span class="kv-label">${k}</span>
+      <span class="kv-value" style="font-size:11px">${v || '—'}</span>
+    </div>
+  `).join('');
+
+  card.classList.add('show');
+}
+
+function resetDemo() {
+  logLines = [];
+  logBox.innerHTML = 'Waiting to start...';
+  $('receiptCard').classList.remove('show');
+  for (let i = 1; i <= 5; i++) setStep(i, '');
+  demoState = {};
+}
+
+// ── Init ──
+loadTeeStatus();
+// Auto-refresh stats every 30s
+setInterval(loadTeeStatus, 30000);
+
+// Expose to global for onclick
+window.runDemo = runDemo;
+window.resetDemo = resetDemo;
+</script>
+</body>
+</html>

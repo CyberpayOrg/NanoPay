@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CybernanoPay — Gas-Free Nanopayments for AI Agents on TON</title>
+  <meta name="description" content="Sub-cent USDT micropayments for AI agents on TON & Telegram. Powered by TEE verifiable batch settlement. Zero gas, instant confirmation." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            background: '#0a0a0a',
+            foreground: '#ffffff',
+            card: '#111111',
+            primary: '#fee7a0',
+            'primary-foreground': '#0a0a0a',
+            secondary: '#1a1a1a',
+            muted: '#1a1a1a',
+            'muted-foreground': '#9ca3af',
+            border: '#222222',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            heading: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0a0a0a; color: #fff; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #fee7a0 0%, #ffffff 100%);
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .glass-nav {
+      background: rgba(10,10,10,0.75);
+      backdrop-filter: blur(20px) saturate(1.4);
+      -webkit-backdrop-filter: blur(20px) saturate(1.4);
+    }
+    .grid-pattern {
+      background-image:
+        linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+      background-size: 80px 80px;
+    }
+    .card-hover { transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; }
+    .card-hover:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.5); border-color: rgba(255,255,255,0.1); }
+
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+    .float-slow { animation: float 6s ease-in-out infinite; }
+
+    @keyframes fadeInUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+    .fade-in-up { animation: fadeInUp 0.8s ease-out forwards; }
+    .fade-delay-1 { animation-delay:0.1s; opacity:0; }
+    .fade-delay-2 { animation-delay:0.2s; opacity:0; }
+    .fade-delay-3 { animation-delay:0.3s; opacity:0; }
+    .fade-delay-4 { animation-delay:0.4s; opacity:0; }
+
+    @keyframes pulseRing { 0%{box-shadow:0 0 0 0 rgba(254,231,160,0.3)} 70%{box-shadow:0 0 0 8px rgba(254,231,160,0)} 100%{box-shadow:0 0 0 0 rgba(254,231,160,0)} }
+    .pulse-ring { animation: pulseRing 2s ease-out infinite; }
+
+    @keyframes lineFlow { 0%{background-position:0 0} 100%{background-position:0 20px} }
+    .arch-line-down {
+      background: repeating-linear-gradient(to bottom, rgba(254,231,160,0.15) 0px, rgba(254,231,160,0.15) 4px, transparent 4px, transparent 10px);
+      background-size: 1px 10px;
+      animation: lineFlow 1.5s linear infinite;
+    }
+
+    .section-glow { background: linear-gradient(180deg, transparent 0%, rgba(254,231,160,0.02) 50%, transparent 100%); }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════ NAV ═══════════════ -->
+  <nav class="fixed top-0 left-0 right-0 z-50 glass-nav border-b border-white/[0.06]">
+    <div class="max-w-[1280px] mx-auto px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+          <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        </div>
+        <span class="text-[16px] font-bold font-heading">CybernanoPay</span>
+      </div>
+      <div class="hidden md:flex items-center gap-8">
+        <a href="#features" class="text-[13px] text-muted-foreground hover:text-white transition-colors">Features</a>
+        <a href="#how-it-works" class="text-[13px] text-muted-foreground hover:text-white transition-colors">How It Works</a>
+        <a href="#architecture" class="text-[13px] text-muted-foreground hover:text-white transition-colors">Architecture</a>
+        <a href="#use-cases" class="text-[13px] text-muted-foreground hover:text-white transition-colors">Use Cases</a>
+        <a href="#developer" class="text-[13px] text-muted-foreground hover:text-white transition-colors">Developer</a>
+      </div>
+      <div class="flex items-center gap-4">
+        <a href="https://github.com/aspect-build/cyber-nano-pay" target="_blank" class="text-[13px] text-muted-foreground hover:text-white transition-colors hidden sm:block">GitHub</a>
+        <a href="#cta" class="inline-flex items-center gap-2 bg-primary hover:bg-primary/80 text-primary-foreground px-5 py-2 rounded-full text-[13px] font-semibold transition-colors">
+          Get Started
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══════════════ HERO ═══════════════ -->
+  <section class="relative overflow-hidden pt-16">
+    <div class="absolute inset-0 grid-pattern"></div>
+    <!-- Glow orbs -->
+    <div class="absolute top-[-200px] left-1/2 -translate-x-1/2 w-[900px] h-[600px] pointer-events-none" style="background:radial-gradient(ellipse,rgba(254,231,160,0.07) 0%,transparent 65%)"></div>
+    <div class="absolute top-[100px] right-[-200px] w-[600px] h-[400px] pointer-events-none" style="background:radial-gradient(ellipse,rgba(99,102,241,0.04) 0%,transparent 70%)"></div>
+
+    <div class="relative max-w-[1280px] mx-auto px-8 pt-32 pb-40 text-center">
+      <!-- Badge -->
+      <div class="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-secondary/50 border border-border/30 text-[13px] text-muted-foreground mb-10 fade-in-up">
+        <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+        Nanopayments for AI Agents on TON & Telegram
+      </div>
+
+      <!-- Title -->
+      <h1 class="text-[48px] lg:text-[76px] font-extrabold leading-[1.05] mb-8 tracking-tight font-heading fade-in-up fade-delay-1">
+        Gas-Free Micropayments<br/>
+        <span class="gradient-text">at Machine Scale</span>
+      </h1>
+
+      <!-- Mono subtitle -->
+      <p class="text-[14px] font-mono text-muted-foreground mb-6 tracking-wide fade-in-up fade-delay-2">
+        TEE Verifiable Batching · Ed25519 Offchain Signing · Sub-Cent USDT on TON
+      </p>
+
+      <!-- Description -->
+      <p class="text-[17px] text-muted-foreground mb-14 max-w-[660px] mx-auto leading-[1.7] fade-in-up fade-delay-3">
+        CybernanoPay enables permissionless, high-frequency programmable payments on TON. 
+        Send as little as $0.000001 with zero gas. Powered by Phala TEE and onchain batch settlement — 
+        the financial rail for autonomous agents in the Telegram ecosystem.
+      </p>
+
+      <!-- CTAs -->
+      <div class="flex items-center justify-center gap-5 fade-in-up fade-delay-4">
+        <a href="#developer" class="inline-flex items-center gap-2.5 bg-primary hover:bg-primary/80 text-primary-foreground px-8 py-3.5 rounded-full text-[15px] font-semibold transition-colors">
+          Start Building
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a href="#how-it-works" class="inline-flex items-center gap-2.5 border border-border/50 bg-transparent text-white hover:bg-secondary/50 px-8 py-3.5 rounded-full text-[15px] font-medium transition-colors">
+          How It Works
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ STATS ═══════════════ -->
+  <section class="py-24 border-y border-border/10">
+    <div class="max-w-[1080px] mx-auto px-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div class="text-center">
+          <p class="text-[48px] font-bold gradient-text leading-none mb-3">$0.000001</p>
+          <p class="text-[14px] text-muted-foreground">Minimum Payment</p>
+        </div>
+        <div class="text-center">
+          <p class="text-[48px] font-bold gradient-text leading-none mb-3">0</p>
+          <p class="text-[14px] text-muted-foreground">Gas Per Transaction</p>
+        </div>
+        <div class="text-center">
+          <p class="text-[48px] font-bold gradient-text leading-none mb-3">&lt;50ms</p>
+          <p class="text-[14px] text-muted-foreground">Confirmation Time</p>
+        </div>
+        <div class="text-center">
+          <p class="text-[48px] font-bold gradient-text leading-none mb-3">5000+</p>
+          <p class="text-[14px] text-muted-foreground">TPS per Batch</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ FEATURES ═══════════════ -->
+  <section id="features" class="py-32 relative">
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[600px] pointer-events-none" style="background:radial-gradient(ellipse,rgba(254,231,160,0.02) 0%,transparent 70%)"></div>
+
+    <div class="max-w-[1280px] mx-auto px-8 relative">
+      <div class="text-center mb-20">
+        <span class="inline-block text-[11px] font-mono uppercase tracking-[0.25em] text-primary/60 mb-5">CORE CAPABILITIES</span>
+        <h2 class="text-[40px] lg:text-[52px] font-extrabold mb-6 tracking-tight leading-tight font-heading">
+          Built for Agentic Scale
+        </h2>
+        <p class="text-[17px] text-muted-foreground max-w-[560px] mx-auto leading-relaxed">
+          Upend legacy limitations. Agentic commerce needs systems designed for sub-cent, machine-driven payments.
+        </p>
+      </div>
+
+      <!-- Top row: 2 featured -->
+      <div class="grid md:grid-cols-2 gap-5 mb-5">
+        <!-- Gas-Free Transfers -->
+        <div class="group relative rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden cursor-pointer transition-all duration-500 hover:border-white/[0.12]">
+          <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style="background:radial-gradient(ellipse at 30% 20%,rgba(254,231,160,0.06) 0%,transparent 60%)"></div>
+          <div class="relative p-8 lg:p-10">
+            <div class="flex items-start justify-between mb-8">
+              <div class="w-14 h-14 rounded-2xl flex items-center justify-center" style="background-color:rgba(254,231,160,0.08);border:1px solid rgba(254,231,160,0.12)">
+                <svg class="w-6 h-6" style="color:#fee7a0cc" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              </div>
+              <span class="text-[10px] font-mono uppercase tracking-[0.15em] px-3 py-1.5 rounded-full border border-white/[0.06] bg-white/[0.02]" style="color:rgba(254,231,160,0.6)">ZERO GAS</span>
+            </div>
+            <h3 class="text-[22px] font-bold mb-4 leading-tight font-heading">Gas-Free Transfers</h3>
+            <p class="text-[14px] text-muted-foreground leading-[1.8] max-w-[480px]">
+              Agents sign Ed25519 payment authorizations offchain — no gas, no onchain transaction per payment. 
+              The TEE aggregator verifies signatures, deducts balances, and confirms to sellers instantly. 
+              The cost of a transaction never exceeds its value.
+            </p>
+          </div>
+        </div>
+
+        <!-- TEE Verifiable -->
+        <div class="group relative rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden cursor-pointer transition-all duration-500 hover:border-white/[0.12]">
+          <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style="background:radial-gradient(ellipse at 30% 20%,rgba(99,102,241,0.06) 0%,transparent 60%)"></div>
+          <div class="relative p-8 lg:p-10">
+            <div class="flex items-start justify-between mb-8">
+              <div class="w-14 h-14 rounded-2xl flex items-center justify-center" style="background-color:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.12)">
+                <svg class="w-6 h-6" style="color:rgba(99,102,241,0.8)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </div>
+              <span class="text-[10px] font-mono uppercase tracking-[0.15em] px-3 py-1.5 rounded-full border border-white/[0.06] bg-white/[0.02]" style="color:rgba(99,102,241,0.6)">PHALA TEE</span>
+            </div>
+            <h3 class="text-[22px] font-bold mb-4 leading-tight font-heading">TEE Verifiable Execution</h3>
+            <p class="text-[14px] text-muted-foreground leading-[1.8] max-w-[480px]">
+              The aggregator runs inside a Phala SGX enclave — tamper-proof, remotely attestable. 
+              Every balance deduction and batch settlement is cryptographically verifiable. 
+              No trust assumptions beyond the hardware.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom row: 4 cards -->
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+        <!-- Batched Settlement -->
+        <div class="group relative rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden transition-all duration-500 hover:border-white/[0.12] card-hover">
+          <div class="relative p-6">
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-5" style="background-color:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.12)">
+              <svg class="w-5 h-5" style="color:rgba(52,211,153,0.8)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+            </div>
+            <h3 class="text-[16px] font-semibold mb-2.5 font-heading">Batched Settlement</h3>
+            <p class="text-[13px] text-muted-foreground leading-[1.7]">
+              Thousands of micropayments are netted and settled in a single onchain transaction. Bilateral netting minimizes Jetton transfers.
+            </p>
+          </div>
+        </div>
+
+        <!-- Spending Policies -->
+        <div class="group relative rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden transition-all duration-500 hover:border-white/[0.12] card-hover">
+          <div class="relative p-6">
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-5" style="background-color:rgba(244,114,182,0.08);border:1px solid rgba(244,114,182,0.12)">
+              <svg class="w-5 h-5" style="color:rgba(244,114,182,0.8)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/><path d="M20.66 8A10 10 0 0 0 16 3.34"/></svg>
+            </div>
+            <h3 class="text-[16px] font-semibold mb-2.5 font-heading">Spending Policies</h3>
+            <p class="text-[13px] text-muted-foreground leading-[1.7]">
+              Per-agent spending limits, daily caps, and configurable thresholds. Fine-grained control over autonomous agent spending.
+            </p>
+          </div>
+        </div>
+
+        <!-- HITL Approval -->
+        <div class="group relative rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden transition-all duration-500 hover:border-white/[0.12] card-hover">
+          <div class="relative p-6">
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-5" style="background-color:rgba(96,165,250,0.08);border:1px solid rgba(96,165,250,0.12)">
+              <svg class="w-5 h-5" style="color:rgba(96,165,250,0.8)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <h3 class="text-[16px] font-semibold mb-2.5 font-heading">Human-in-the-Loop</h3>
+            <p class="text-[13px] text-muted-foreground leading-[1.7]">
+              Large payments trigger Telegram approval requests. Humans stay in control while agents operate autonomously for routine transactions.
+            </p>
+          </div>
+        </div>
+
+        <!-- x402 Compatible -->
+        <div class="group relative rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden transition-all duration-500 hover:border-white/[0.12] card-hover">
+          <div class="relative p-6">
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-5" style="background-color:rgba(234,179,8,0.08);border:1px solid rgba(234,179,8,0.12)">
+              <svg class="w-5 h-5" style="color:rgba(234,179,8,0.8)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            </div>
+            <h3 class="text-[16px] font-semibold mb-2.5 font-heading">x402 Compatible</h3>
+            <p class="text-[13px] text-muted-foreground leading-[1.7]">
+              HTTP 402 Payment Required protocol. Sellers return payment requirements, buyers sign and retry — seamless machine-to-machine commerce.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ HOW IT WORKS ═══════════════ -->
+  <section id="how-it-works" class="py-32 bg-gradient-to-b from-transparent via-card/20 to-transparent">
+    <div class="max-w-[1080px] mx-auto px-8">
+      <div class="text-center mb-20">
+        <span class="inline-block text-[11px] font-mono uppercase tracking-[0.25em] text-primary/60 mb-5">PAYMENT FLOW</span>
+        <h2 class="text-[40px] lg:text-[52px] font-extrabold tracking-tight leading-tight font-heading">
+          How It Works
+        </h2>
+      </div>
+
+      <div class="grid md:grid-cols-4 gap-10">
+        <!-- Step 1 -->
+        <div class="relative text-center">
+          <div class="hidden md:block absolute top-10 left-[60%] w-[80%] h-px bg-gradient-to-r from-border/40 to-transparent"></div>
+          <div class="w-20 h-20 rounded-2xl border border-border/30 bg-secondary/30 flex items-center justify-center mx-auto mb-6">
+            <svg class="w-7 h-7 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          </div>
+          <span class="text-[11px] font-mono text-primary/60 uppercase tracking-widest">01</span>
+          <h3 class="text-[18px] font-semibold mt-3 mb-3 font-heading">Deposit USDT</h3>
+          <p class="text-[13px] text-muted-foreground leading-[1.7]">
+            Agent deposits USDT to the CyberGateway smart contract on TON. One-time onchain transaction.
+          </p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="relative text-center">
+          <div class="hidden md:block absolute top-10 left-[60%] w-[80%] h-px bg-gradient-to-r from-border/40 to-transparent"></div>
+          <div class="w-20 h-20 rounded-2xl border border-border/30 bg-secondary/30 flex items-center justify-center mx-auto mb-6">
+            <svg class="w-7 h-7 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M15.5 2H8.6c-.4 0-.8.2-1.1.5-.3.3-.5.7-.5 1.1v16.8c0 .4.2.8.5 1.1.3.3.7.5 1.1.5h6.9"/><path d="M20 14V5.5C20 4.1 18.9 3 17.5 3"/><path d="M12 12h4"/><path d="M12 16h4"/></svg>
+          </div>
+          <span class="text-[11px] font-mono text-primary/60 uppercase tracking-widest">02</span>
+          <h3 class="text-[18px] font-semibold mt-3 mb-3 font-heading">Sign Offchain</h3>
+          <p class="text-[13px] text-muted-foreground leading-[1.7]">
+            For each payment, agent signs an Ed25519 authorization offchain. Zero gas, instant — like signing a check.
+          </p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="relative text-center">
+          <div class="hidden md:block absolute top-10 left-[60%] w-[80%] h-px bg-gradient-to-r from-border/40 to-transparent"></div>
+          <div class="w-20 h-20 rounded-2xl border border-border/30 bg-secondary/30 flex items-center justify-center mx-auto mb-6">
+            <svg class="w-7 h-7 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <span class="text-[11px] font-mono text-primary/60 uppercase tracking-widest">03</span>
+          <h3 class="text-[18px] font-semibold mt-3 mb-3 font-heading">TEE Verifies</h3>
+          <p class="text-[13px] text-muted-foreground leading-[1.7]">
+            Phala TEE aggregator verifies the signature, checks balance, deducts, and confirms to the seller — all inside a secure enclave.
+          </p>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="relative text-center">
+          <div class="w-20 h-20 rounded-2xl border border-border/30 bg-secondary/30 flex items-center justify-center mx-auto mb-6">
+            <svg class="w-7 h-7 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+          </div>
+          <span class="text-[11px] font-mono text-primary/60 uppercase tracking-widest">04</span>
+          <h3 class="text-[18px] font-semibold mt-3 mb-3 font-heading">Batch Settle</h3>
+          <p class="text-[13px] text-muted-foreground leading-[1.7]">
+            TEE periodically submits batchSettle() to the CyberGateway contract. Thousands of payments, one onchain tx.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ ARCHITECTURE ═══════════════ -->
+  <section id="architecture" class="py-32 relative overflow-hidden">
+    <div class="absolute inset-0 pointer-events-none">
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px]" style="background:radial-gradient(ellipse,rgba(254,231,160,0.03) 0%,transparent 70%)"></div>
+    </div>
+
+    <div class="max-w-[900px] mx-auto px-8 relative">
+      <div class="text-center mb-20">
+        <span class="inline-block text-[11px] font-mono uppercase tracking-[0.25em] text-primary/60 mb-5">SYSTEM DESIGN</span>
+        <h2 class="text-[40px] lg:text-[52px] font-extrabold mb-6 tracking-tight leading-tight font-heading">Architecture</h2>
+        <p class="text-[17px] text-muted-foreground max-w-[520px] mx-auto leading-relaxed">
+          Offchain speed meets onchain security. TEE-verified aggregation bridges the gap.
+        </p>
+      </div>
+
+      <!-- Flow diagram -->
+      <div class="flex flex-col items-center gap-0">
+
+        <!-- Agent Layer -->
+        <div class="relative group">
+          <div class="absolute inset-0 rounded-2xl bg-primary/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div class="relative flex items-center gap-4 px-8 py-5 rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+              <svg class="w-6 h-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 8V4H8"/><rect x="8" y="8" width="8" height="8" rx="1"/><path d="M4 12h4M16 12h4M12 16v4"/></svg>
+            </div>
+            <div>
+              <p class="text-[16px] font-semibold font-heading">AI Agent (Buyer)</p>
+              <p class="text-[12px] text-muted-foreground/60 mt-0.5">Deposits USDT · Signs Ed25519 authorizations offchain</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Connector -->
+        <div class="flex flex-col items-center py-2">
+          <div class="w-px h-8 arch-line-down"></div>
+          <div class="px-4 py-1.5 rounded-full bg-primary/[0.06] border border-primary/10">
+            <span class="text-[11px] font-mono text-primary/70 tracking-wider">OFFCHAIN · ZERO GAS</span>
+          </div>
+          <div class="w-px h-8 arch-line-down"></div>
+        </div>
+
+        <!-- TEE Layer -->
+        <div class="w-full max-w-[700px]">
+          <div class="relative rounded-[28px] border border-white/[0.08] overflow-hidden" style="background:linear-gradient(180deg,rgba(99,102,241,0.04) 0%,rgba(10,10,10,0.8) 100%)">
+            <div class="absolute -top-px left-1/2 -translate-x-1/2 w-[60%] h-px" style="background:linear-gradient(90deg,transparent,rgba(99,102,241,0.3),transparent)"></div>
+            <div class="p-8 text-center">
+              <div class="inline-flex items-center gap-2 mb-4">
+                <svg class="w-5 h-5" style="color:rgba(99,102,241,0.8)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <span class="text-[15px] font-semibold font-heading">Phala TEE Aggregator</span>
+              </div>
+              <p class="text-[13px] text-muted-foreground/60 mb-6">SGX Enclave · Remote Attestation · Tamper-Proof</p>
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div class="rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-3">
+                  <p class="text-[11px] font-mono text-primary/60">Verify</p>
+                  <p class="text-[10px] text-muted-foreground/50 mt-1">Ed25519 Sig</p>
+                </div>
+                <div class="rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-3">
+                  <p class="text-[11px] font-mono text-primary/60">Deduct</p>
+                  <p class="text-[10px] text-muted-foreground/50 mt-1">Balance Check</p>
+                </div>
+                <div class="rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-3">
+                  <p class="text-[11px] font-mono text-primary/60">Batch</p>
+                  <p class="text-[10px] text-muted-foreground/50 mt-1">Net Positions</p>
+                </div>
+                <div class="rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-3">
+                  <p class="text-[11px] font-mono text-primary/60">Receipt</p>
+                  <p class="text-[10px] text-muted-foreground/50 mt-1">Merkle Proof</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Connector -->
+        <div class="flex flex-col items-center py-2">
+          <div class="w-px h-8 arch-line-down"></div>
+          <div class="px-4 py-1.5 rounded-full bg-primary/[0.06] border border-primary/10">
+            <span class="text-[11px] font-mono text-primary/70 tracking-wider">BATCH SETTLE · ONCHAIN</span>
+          </div>
+          <div class="w-px h-8 arch-line-down"></div>
+        </div>
+
+        <!-- Contract Layer -->
+        <div class="relative group">
+          <div class="absolute inset-0 rounded-2xl bg-blue-500/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+          <div class="relative flex items-center gap-4 px-8 py-5 rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-500/5 flex items-center justify-center">
+              <svg class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+            </div>
+            <div>
+              <p class="text-[16px] font-semibold font-heading">CyberGateway Contract</p>
+              <p class="text-[12px] text-muted-foreground/60 mt-0.5">TON Blockchain · Tact · Jetton USDT Transfers</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Connector -->
+        <div class="flex flex-col items-center py-2">
+          <div class="w-px h-8 arch-line-down"></div>
+        </div>
+
+        <!-- Seller -->
+        <div class="relative group">
+          <div class="relative flex items-center gap-4 px-8 py-5 rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-sm">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500/20 to-green-500/5 flex items-center justify-center">
+              <svg class="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div>
+              <p class="text-[16px] font-semibold font-heading">Sellers Receive USDT</p>
+              <p class="text-[12px] text-muted-foreground/60 mt-0.5">Instant offchain confirmation · Periodic onchain settlement</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ USE CASES ═══════════════ -->
+  <section id="use-cases" class="py-32 relative">
+    <div class="absolute inset-0 pointer-events-none section-glow"></div>
+    <div class="max-w-[1080px] mx-auto px-8 relative">
+      <div class="text-center mb-20">
+        <span class="inline-block text-[11px] font-mono uppercase tracking-[0.25em] text-primary/60 mb-5">APPLICATIONS</span>
+        <h2 class="text-[40px] lg:text-[52px] font-extrabold mb-6 tracking-tight leading-tight font-heading">
+          Ship Machine-Scale Payments
+        </h2>
+        <p class="text-[17px] text-muted-foreground max-w-[560px] mx-auto leading-relaxed">
+          From agentic commerce to usage-based billing — nanopayments unlock new economic models on Telegram.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-5">
+        <!-- Agentic Payments -->
+        <div class="group relative rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden transition-all duration-500 hover:border-white/[0.12] card-hover">
+          <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style="background:radial-gradient(ellipse at 30% 20%,rgba(254,231,160,0.04) 0%,transparent 60%)"></div>
+          <div class="relative p-8">
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-6" style="background-color:rgba(254,231,160,0.08);border:1px solid rgba(254,231,160,0.12)">
+              <svg class="w-5 h-5" style="color:#fee7a0cc" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 8V4H8"/><rect x="8" y="8" width="8" height="8" rx="1"/><path d="M4 12h4M16 12h4M12 16v4"/></svg>
+            </div>
+            <h3 class="text-[18px] font-semibold mb-3 font-heading">Agentic Payments</h3>
+            <p class="text-[14px] text-muted-foreground leading-[1.8]">
+              AI agents transact at high frequency in sub-cent amounts. NanoPay lets them move value autonomously at internet speed without cost friction. Agents on Telegram can pay for API calls, data, and services seamlessly.
+            </p>
+          </div>
+        </div>
+
+        <!-- Usage-Based Billing -->
+        <div class="group relative rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden transition-all duration-500 hover:border-white/[0.12] card-hover">
+          <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style="background:radial-gradient(ellipse at 30% 20%,rgba(52,211,153,0.04) 0%,transparent 60%)"></div>
+          <div class="relative p-8">
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-6" style="background-color:rgba(52,211,153,0.08);border:1px solid rgba(52,211,153,0.12)">
+              <svg class="w-5 h-5" style="color:rgba(52,211,153,0.8)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <h3 class="text-[18px] font-semibold mb-3 font-heading">Usage-Based Billing</h3>
+            <p class="text-[14px] text-muted-foreground leading-[1.8]">
+              Pay-per-use billing models where agents are charged only for what they consume — per API call, per second of compute, per dataset access. No subscriptions, no minimums.
+            </p>
+          </div>
+        </div>
+
+        <!-- Machine-to-Machine -->
+        <div class="group relative rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden transition-all duration-500 hover:border-white/[0.12] card-hover">
+          <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style="background:radial-gradient(ellipse at 30% 20%,rgba(99,102,241,0.04) 0%,transparent 60%)"></div>
+          <div class="relative p-8">
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-6" style="background-color:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.12)">
+              <svg class="w-5 h-5" style="color:rgba(99,102,241,0.8)" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </div>
+            <h3 class="text-[18px] font-semibold mb-3 font-heading">Agent-to-Agent Commerce</h3>
+            <p class="text-[14px] text-muted-foreground leading-[1.8]">
+              As autonomous agents proliferate on Telegram, they need to pay each other for services — data feeds, compute, inference. NanoPay enables the formation of agent-to-agent marketplaces.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ DEVELOPER ═══════════════ -->
+  <section id="developer" class="py-32 relative">
+    <div class="absolute inset-0 pointer-events-none" style="background:linear-gradient(180deg,transparent 0%,rgba(254,231,160,0.01) 50%,transparent 100%)"></div>
+
+    <div class="max-w-[1120px] mx-auto px-8 relative">
+      <div class="text-center mb-20">
+        <span class="inline-block text-[11px] font-mono uppercase tracking-[0.25em] text-primary/60 mb-5">DEVELOPER EXPERIENCE</span>
+        <h2 class="text-[40px] lg:text-[52px] font-extrabold mb-6 tracking-tight leading-tight font-heading">
+          Integrate in Minutes
+        </h2>
+        <p class="text-[17px] text-muted-foreground">SDK for buyers, HTTP gateway for sellers. x402 protocol out of the box.</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+        <!-- Buyer SDK -->
+        <div class="group relative rounded-2xl border border-white/[0.06] bg-[#0c0c0e] overflow-hidden transition-all duration-500 hover:border-white/[0.1]">
+          <div class="absolute top-0 left-0 right-0 h-px" style="background:linear-gradient(90deg,transparent,rgba(96,165,250,0.3),transparent)"></div>
+          <div class="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.04] bg-white/[0.01]">
+            <div class="flex items-center gap-3">
+              <div class="flex gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-white/[0.06]"></span>
+                <span class="w-3 h-3 rounded-full bg-white/[0.06]"></span>
+                <span class="w-3 h-3 rounded-full bg-white/[0.06]"></span>
+              </div>
+              <div class="flex items-center gap-2 ml-2">
+                <svg class="w-3.5 h-3.5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+                <span class="text-[12px] font-medium text-white/60">Buyer Agent — SDK</span>
+              </div>
+            </div>
+          </div>
+          <div class="px-5 py-6 overflow-x-auto">
+            <pre class="text-[13px] leading-[1.9] font-mono"><code><span class="text-purple-400">import</span> <span class="text-white/80">{ NanoPayClient }</span> <span class="text-purple-400">from</span> <span class="text-green-400">"@cyberpay/nanopay"</span>;
+
+<span class="text-purple-400">const</span> <span class="text-white/80">client</span> <span class="text-white/40">=</span> <span class="text-purple-400">new</span> <span class="text-blue-400">NanoPayClient</span><span class="text-white/40">({</span>
+  <span class="text-pink-400">keypair</span><span class="text-white/40">,</span>
+  <span class="text-pink-400">teeUrl</span><span class="text-white/40">:</span> <span class="text-green-400">"https://tee.cyberpay.org"</span>
+<span class="text-white/40">});</span>
+
+<span class="text-white/25">// Pay $0.001 for an API call — zero gas</span>
+<span class="text-purple-400">const</span> <span class="text-white/80">receipt</span> <span class="text-white/40">=</span> <span class="text-purple-400">await</span> <span class="text-white/80">client</span><span class="text-white/40">.</span><span class="text-blue-400">pay</span><span class="text-white/40">({</span>
+  <span class="text-pink-400">to</span><span class="text-white/40">:</span> <span class="text-green-400">"seller-address"</span><span class="text-white/40">,</span>
+  <span class="text-pink-400">amount</span><span class="text-white/40">:</span> <span class="text-yellow-400">1000</span><span class="text-white/40">,</span>  <span class="text-white/25">// 0.001 USDT</span>
+<span class="text-white/40">});</span>
+<span class="text-white/25">// ✅ Instant confirmation, TEE-signed receipt</span></code></pre>
+          </div>
+          <div class="px-5 py-3.5 border-t border-white/[0.04] bg-white/[0.01]">
+            <p class="text-[12px] text-muted-foreground/50">Sign → TEE verify → Instant receipt. No onchain tx needed.</p>
+          </div>
+        </div>
+
+        <!-- Seller Gateway -->
+        <div class="group relative rounded-2xl border border-white/[0.06] bg-[#0c0c0e] overflow-hidden transition-all duration-500 hover:border-white/[0.1]">
+          <div class="absolute top-0 left-0 right-0 h-px" style="background:linear-gradient(90deg,transparent,rgba(254,231,160,0.3),transparent)"></div>
+          <div class="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.04] bg-white/[0.01]">
+            <div class="flex items-center gap-3">
+              <div class="flex gap-1.5">
+                <span class="w-3 h-3 rounded-full bg-white/[0.06]"></span>
+                <span class="w-3 h-3 rounded-full bg-white/[0.06]"></span>
+                <span class="w-3 h-3 rounded-full bg-white/[0.06]"></span>
+              </div>
+              <div class="flex items-center gap-2 ml-2">
+                <svg class="w-3.5 h-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                <span class="text-[12px] font-medium text-white/60">Seller — x402 Gateway</span>
+              </div>
+            </div>
+          </div>
+          <div class="px-5 py-6 overflow-x-auto">
+            <pre class="text-[13px] leading-[1.9] font-mono"><code><span class="text-purple-400">import</span> <span class="text-white/80">{ requirePayment }</span> <span class="text-purple-400">from</span> <span class="text-green-400">"@cyberpay/gateway"</span>;
+
+<span class="text-white/25">// Gate any route behind nanopayment</span>
+<span class="text-white/80">app</span><span class="text-white/40">.</span><span class="text-blue-400">get</span><span class="text-white/40">(</span><span class="text-green-400">"/premium-data"</span><span class="text-white/40">,</span>
+  <span class="text-blue-400">requirePayment</span><span class="text-white/40">({</span>
+    <span class="text-pink-400">amount</span><span class="text-white/40">:</span> <span class="text-green-400">"1000"</span><span class="text-white/40">,</span>  <span class="text-white/25">// 0.001 USDT</span>
+    <span class="text-pink-400">to</span><span class="text-white/40">:</span> <span class="text-green-400">"your-ton-address"</span>
+  <span class="text-white/40">}),</span>
+  <span class="text-white/40">(</span><span class="text-white/80">c</span><span class="text-white/40">) =></span> <span class="text-white/80">c</span><span class="text-white/40">.</span><span class="text-blue-400">json</span><span class="text-white/40">({</span> <span class="text-pink-400">data</span><span class="text-white/40">:</span> <span class="text-green-400">"premium content"</span> <span class="text-white/40">})</span>
+<span class="text-white/40">);</span>
+<span class="text-white/25">// No payment? → 402 with requirements</span>
+<span class="text-white/25">// Has payment? → TEE verify → serve resource</span></code></pre>
+          </div>
+          <div class="px-5 py-3.5 border-t border-white/[0.04] bg-white/[0.01]">
+            <p class="text-[12px] text-muted-foreground/50">HTTP 402 protocol. One middleware, instant monetization.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ TEE DEEP DIVE ═══════════════ -->
+  <section class="py-32 bg-gradient-to-b from-transparent via-card/20 to-transparent">
+    <div class="max-w-[1080px] mx-auto px-8">
+      <div class="text-center mb-20">
+        <span class="inline-block text-[11px] font-mono uppercase tracking-[0.25em] text-primary/60 mb-5">TRUST MODEL</span>
+        <h2 class="text-[40px] lg:text-[52px] font-extrabold mb-6 tracking-tight leading-tight font-heading">
+          Why TEE Matters
+        </h2>
+        <p class="text-[17px] text-muted-foreground max-w-[560px] mx-auto leading-relaxed">
+          Traditional payment channels require onchain state for every update. TEE eliminates that overhead while preserving verifiability.
+        </p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="text-center">
+          <div class="w-16 h-16 rounded-2xl border border-white/[0.08] bg-white/[0.03] flex items-center justify-center mx-auto mb-6">
+            <svg class="w-7 h-7 text-primary/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3 class="text-[18px] font-semibold mb-3 font-heading">Tamper-Proof Execution</h3>
+          <p class="text-[13px] text-muted-foreground leading-[1.7]">
+            Code runs inside Intel SGX enclaves on Phala Network. Even the server operator cannot read or modify the aggregator's state. Balance tracking is cryptographically sealed.
+          </p>
+        </div>
+
+        <div class="text-center">
+          <div class="w-16 h-16 rounded-2xl border border-white/[0.08] bg-white/[0.03] flex items-center justify-center mx-auto mb-6">
+            <svg class="w-7 h-7 text-primary/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M9 12l2 2 4-4"/><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+          </div>
+          <h3 class="text-[18px] font-semibold mb-3 font-heading">Remote Attestation</h3>
+          <p class="text-[13px] text-muted-foreground leading-[1.7]">
+            Anyone can verify the exact code running inside the enclave via attestation reports. The TEE public key, platform info, and code hash are all publicly auditable.
+          </p>
+        </div>
+
+        <div class="text-center">
+          <div class="w-16 h-16 rounded-2xl border border-white/[0.08] bg-white/[0.03] flex items-center justify-center mx-auto mb-6">
+            <svg class="w-7 h-7 text-primary/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <h3 class="text-[18px] font-semibold mb-3 font-heading">Verifiable Receipts</h3>
+          <p class="text-[13px] text-muted-foreground leading-[1.7]">
+            Every payment produces a TEE-signed receipt with Merkle proof inclusion. Receipts are independently verifiable without trusting any third party.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ COMPARISON ═══════════════ -->
+  <section class="py-32 relative">
+    <div class="max-w-[900px] mx-auto px-8">
+      <div class="text-center mb-16">
+        <span class="inline-block text-[11px] font-mono uppercase tracking-[0.25em] text-primary/60 mb-5">COMPARISON</span>
+        <h2 class="text-[40px] lg:text-[52px] font-extrabold mb-6 tracking-tight leading-tight font-heading">
+          Why Not Just Send Onchain?
+        </h2>
+      </div>
+
+      <div class="rounded-2xl border border-white/[0.06] overflow-hidden">
+        <table class="w-full text-left">
+          <thead>
+            <tr class="border-b border-white/[0.06] bg-white/[0.02]">
+              <th class="px-6 py-4 text-[12px] font-mono uppercase tracking-wider text-muted-foreground/60"></th>
+              <th class="px-6 py-4 text-[12px] font-mono uppercase tracking-wider text-muted-foreground/60">Direct Onchain</th>
+              <th class="px-6 py-4 text-[12px] font-mono uppercase tracking-wider text-primary/70">CybernanoPay</th>
+            </tr>
+          </thead>
+          <tbody class="text-[14px]">
+            <tr class="border-b border-white/[0.04]">
+              <td class="px-6 py-4 text-muted-foreground">Gas per payment</td>
+              <td class="px-6 py-4 text-muted-foreground/60">~0.01 TON</td>
+              <td class="px-6 py-4 text-primary/80 font-medium">0 (offchain)</td>
+            </tr>
+            <tr class="border-b border-white/[0.04]">
+              <td class="px-6 py-4 text-muted-foreground">Min viable payment</td>
+              <td class="px-6 py-4 text-muted-foreground/60">~$0.01 (gas floor)</td>
+              <td class="px-6 py-4 text-primary/80 font-medium">$0.000001</td>
+            </tr>
+            <tr class="border-b border-white/[0.04]">
+              <td class="px-6 py-4 text-muted-foreground">Confirmation</td>
+              <td class="px-6 py-4 text-muted-foreground/60">~5s (block time)</td>
+              <td class="px-6 py-4 text-primary/80 font-medium">&lt;50ms (TEE)</td>
+            </tr>
+            <tr class="border-b border-white/[0.04]">
+              <td class="px-6 py-4 text-muted-foreground">Throughput</td>
+              <td class="px-6 py-4 text-muted-foreground/60">Limited by chain TPS</td>
+              <td class="px-6 py-4 text-primary/80 font-medium">5000+ TPS per batch</td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4 text-muted-foreground">Trust model</td>
+              <td class="px-6 py-4 text-muted-foreground/60">Fully onchain</td>
+              <td class="px-6 py-4 text-primary/80 font-medium">TEE attestable + onchain settlement</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ CTA ═══════════════ -->
+  <section id="cta" class="py-32">
+    <div class="max-w-[960px] mx-auto px-8 text-center">
+      <div class="rounded-3xl border border-border/30 bg-card/50 px-12 py-24 relative overflow-hidden">
+        <div class="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full pointer-events-none" style="background:radial-gradient(ellipse,rgba(254,231,160,0.05) 0%,transparent 70%)"></div>
+        <div class="relative">
+          <h2 class="text-[40px] lg:text-[52px] font-extrabold mb-6 tracking-tight leading-tight font-heading">
+            Build the Future of<br/><span class="gradient-text">Agentic Commerce</span>
+          </h2>
+          <p class="text-[14px] text-muted-foreground font-mono mb-12 tracking-wide">
+            Gas-free · Sub-cent · TEE-verified · TON native
+          </p>
+          <div class="flex items-center justify-center gap-5 flex-wrap">
+            <a href="https://github.com/aspect-build/cyber-nano-pay" target="_blank" class="inline-flex items-center gap-2.5 bg-primary hover:bg-primary/80 text-primary-foreground px-8 py-3.5 rounded-full text-[15px] font-semibold transition-colors">
+              View on GitHub
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+            <a href="https://docs.cyberpay.org" target="_blank" class="inline-flex items-center gap-2.5 border border-border/50 bg-transparent text-white hover:bg-secondary/50 px-8 py-3.5 rounded-full text-[15px] font-medium transition-colors">
+              Read the Docs
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ FOOTER ═══════════════ -->
+  <footer class="border-t border-border/20 pt-20 pb-12">
+    <div class="max-w-[1280px] mx-auto px-8">
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-12 mb-16">
+        <!-- Brand -->
+        <div class="col-span-2 md:col-span-1">
+          <div class="flex items-center gap-2 mb-5">
+            <div class="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+              <svg class="w-3.5 h-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            </div>
+            <span class="text-[14px] font-bold font-heading">CybernanoPay</span>
+          </div>
+          <p class="text-[13px] text-muted-foreground leading-relaxed">
+            Gas-free nanopayments<br/>for AI agents on TON
+          </p>
+        </div>
+
+        <!-- Protocol -->
+        <div>
+          <p class="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-5">Protocol</p>
+          <ul class="space-y-3">
+            <li><a href="#how-it-works" class="text-[13px] text-muted-foreground hover:text-white transition-colors">How It Works</a></li>
+            <li><a href="#architecture" class="text-[13px] text-muted-foreground hover:text-white transition-colors">Architecture</a></li>
+            <li><a href="#features" class="text-[13px] text-muted-foreground hover:text-white transition-colors">Features</a></li>
+            <li><a href="#" class="text-[13px] text-muted-foreground hover:text-white transition-colors">Smart Contract</a></li>
+          </ul>
+        </div>
+
+        <!-- Developer -->
+        <div>
+          <p class="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-5">Developer</p>
+          <ul class="space-y-3">
+            <li><a href="#" class="text-[13px] text-muted-foreground hover:text-white transition-colors">Documentation</a></li>
+            <li><a href="#" class="text-[13px] text-muted-foreground hover:text-white transition-colors">SDK Reference</a></li>
+            <li><a href="#" class="text-[13px] text-muted-foreground hover:text-white transition-colors">x402 Protocol</a></li>
+            <li><a href="#" class="text-[13px] text-muted-foreground hover:text-white transition-colors">GitHub</a></li>
+          </ul>
+        </div>
+
+        <!-- Ecosystem -->
+        <div>
+          <p class="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-5">Ecosystem</p>
+          <ul class="space-y-3">
+            <li><a href="#" class="text-[13px] text-muted-foreground hover:text-white transition-colors">TON Blockchain</a></li>
+            <li><a href="#" class="text-[13px] text-muted-foreground hover:text-white transition-colors">Phala Network</a></li>
+            <li><a href="#" class="text-[13px] text-muted-foreground hover:text-white transition-colors">Telegram</a></li>
+            <li><a href="#" class="text-[13px] text-muted-foreground hover:text-white transition-colors">CyberPay</a></li>
+          </ul>
+        </div>
+
+        <!-- Company -->
+        <div>
+          <p class="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground mb-5">Company</p>
+          <ul class="space-y-3">
+            <li><a href="#" class="text-[13px] text-muted-foreground hover:text-white transition-colors">About</a></li>
+            <li><a href="#" class="text-[13px] text-muted-foreground hover:text-white transition-colors">Blog</a></li>
+            <li><a href="#" class="text-[13px] text-muted-foreground hover:text-white transition-colors">Contact</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Bottom -->
+      <div class="flex flex-col md:flex-row items-center justify-between pt-8 border-t border-border/20">
+        <p class="text-[12px] text-muted-foreground">© 2025 CyberPay. All rights reserved.</p>
+        <div class="flex gap-8 mt-4 md:mt-0">
+          <a href="#" class="text-[12px] text-muted-foreground hover:text-white transition-colors">Privacy</a>
+          <a href="#" class="text-[12px] text-muted-foreground hover:text-white transition-colors">Terms</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
