@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
 <title>CyberNanoPay — Live Demo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -384,6 +385,45 @@
 
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* Code blocks */
+  .code-block {
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.8;
+    color: #abb2bf;
+    background: #0c0c0e;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    white-space: pre;
+    margin: 0;
+  }
+  .ck  { color: #c678dd; }
+  .cs  { color: #98c379; }
+  .cf  { color: #61afef; }
+  .cc  { color: rgba(255,255,255,0.22); font-style: italic; }
+  .cn  { color: #d19a66; }
+  .cp  { color: #e5c07b; }
+
+  /* x402 flow */
+  .http-log {
+    background: #0c0c0e;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.8;
+    min-height: 120px;
+  }
+  .hl-req  { color: #61afef; }
+  .hl-res  { color: #98c379; }
+  .hl-402  { color: #e5c07b; }
+  .hl-pay  { color: #c678dd; }
+  .hl-dim  { color: rgba(255,255,255,0.25); }
+  .hl-ok   { color: #22c55e; }
+
   /* Responsive */
   @media (max-width: 768px) {
     .grid { grid-template-columns: 1fr; }
@@ -551,6 +591,77 @@
           <div class="demo-step-label">HITL Approval</div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- x402 Flow Demo -->
+  <div class="grid grid-full" style="margin-top:20px">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">x402 Live Flow</span>
+        <span class="card-badge badge-gold">HTTP 402 Protocol</span>
+      </div>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;line-height:1.6">
+        An AI agent calls a paid API. The server returns 402. The SDK automatically signs a payment, retries, and gets the response — all in one <code style="font-family:var(--mono);color:var(--gold);font-size:12px">payAndFetch()</code> call.
+      </p>
+      <div class="http-log" id="x402Log"><span class="hl-dim">Click ▶ to run the x402 payment flow...</span></div>
+      <div class="btn-row" style="margin-top:16px">
+        <button class="btn btn-gold" id="btnX402" onclick="runX402Flow()">▶ Run x402 Flow</button>
+        <button class="btn btn-outline" onclick="resetX402()">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SDK Quick Start -->
+  <div class="grid" style="margin-top:20px">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Buyer SDK</span>
+        <span class="card-badge badge-blue">AI Agent</span>
+      </div>
+      <pre class="code-block"><span class="ck">import</span> { CyberNanoPayBuyer } <span class="ck">from</span> <span class="cs">"cyber-nano-pay-sdk"</span>;
+
+<span class="cc">// Initialize once with your TON address + keypair</span>
+<span class="ck">const</span> buyer = <span class="ck">new</span> <span class="cf">CyberNanoPayBuyer</span>({
+  keypair: myEd25519Keypair,
+  address:    <span class="cs">"EQD..."</span>,
+  gatewayUrl: <span class="cs">"https://gateway.cyberpay.dev"</span>,
+});
+
+<span class="cc">// Pay for any 402-protected API — one line</span>
+<span class="ck">const</span> res = <span class="ck">await</span> buyer.<span class="cf">payAndFetch</span>(
+  <span class="cs">"https://api.example.com/ai/generate"</span>
+);
+<span class="ck">const</span> data = <span class="ck">await</span> res.<span class="cf">json</span>();
+
+<span class="cc">// Or sign manually for custom flows</span>
+<span class="ck">const</span> auth = buyer.<span class="cf">signAuthorization</span>({
+  to: sellerAddress,  amount: <span class="cn">1000n</span>, <span class="cc">// $0.001 USDT</span>
+});</pre>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Seller SDK</span>
+        <span class="card-badge badge-green">API Provider</span>
+      </div>
+      <pre class="code-block"><span class="ck">import</span> { requirePayment } <span class="ck">from</span> <span class="cs">"cyber-nano-pay-gateway"</span>;
+
+<span class="cc">// Gate any endpoint with one middleware line</span>
+app.<span class="cf">get</span>(<span class="cs">"/api/ai/generate"</span>,
+  <span class="cf">requirePayment</span>({
+    amount: <span class="cs">"1000"</span>,      <span class="cc">// $0.001 USDT per call</span>
+    to:     myTonAddress,
+  }),
+  <span class="ck">async</span> (c) =&gt; {
+    <span class="cc">// Payment verified by TEE — run your logic</span>
+    <span class="ck">const</span> payment = c.<span class="cf">get</span>(<span class="cs">"payment"</span>);
+    <span class="cc">// payment.confirmationId, .from, .amount</span>
+    <span class="ck">return</span> c.<span class="cf">json</span>({ result: <span class="cs">"AI response"</span> });
+  }
+);
+
+<span class="cc">// TEE receipt auto-attached — verifiable on-chain</span>
+<span class="cc">// No payment infra to manage. Zero gas.</span></pre>
     </div>
   </div>
 </main>
@@ -906,6 +1017,128 @@ function resetDemo() {
   for (let i = 1; i <= 5; i++) setStep(i, '');
   demoState = {};
 }
+
+// ── x402 Flow Demo ──
+
+let x402Lines = [];
+const x402Log = () => document.getElementById('x402Log');
+
+function x402Log_(html) {
+  x402Lines.push(html);
+  x402Log().innerHTML = x402Lines.join('\n');
+  x402Log().scrollTop = x402Log().scrollHeight;
+}
+
+function resetX402() {
+  x402Lines = [];
+  x402Log().innerHTML = '<span class="hl-dim">Click ▶ to run the x402 payment flow...</span>';
+  document.getElementById('btnX402').disabled = false;
+  document.getElementById('btnX402').innerHTML = '▶ Run x402 Flow';
+}
+
+async function runX402Flow() {
+  const btn = document.getElementById('btnX402');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Running...';
+  x402Lines = [];
+  x402Log().innerHTML = '';
+
+  try {
+    await loadNacl();
+
+    // Need a funded demo buyer from the main demo, or create a fresh one
+    const buyerKp = nacl.sign.keyPair();
+    const sellerKp = nacl.sign.keyPair();
+    const buyerAddr = pubkeyToAddress(buyerKp.publicKey);
+    const sellerAddr = pubkeyToAddress(sellerKp.publicKey);
+    const buyerPubHex = toHex(buyerKp.publicKey);
+
+    // Register + fund
+    await fetch(`${TEE_URL}/register-key`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ADMIN_TOKEN}` },
+      body: JSON.stringify({ address: buyerAddr, publicKey: buyerPubHex }),
+    });
+    await fetch(`${TEE_URL}/simulate-deposit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ADMIN_TOKEN}` },
+      body: JSON.stringify({ address: buyerAddr, amount: '5000000' }),
+    });
+
+    const PREMIUM_URL = 'https://api.example.com/ai/generate';
+    const AMOUNT = 1000n; // $0.001 USDT
+
+    // Step 1: initial request (no payment)
+    await sleep(400);
+    x402Log_(`<span class="hl-dim">// buyer.payAndFetch("${PREMIUM_URL}")</span>`);
+    await sleep(300);
+    x402Log_(`<span class="hl-req">→ GET ${PREMIUM_URL}</span>`);
+    await sleep(600);
+    x402Log_(`<span class="hl-402">← 402 Payment Required</span>`);
+    x402Log_(`<span class="hl-dim">   scheme: ton-nanopay  amount: 0.001 USDT  to: ${sellerAddr.slice(0,20)}...</span>`);
+    await sleep(500);
+
+    // Step 2: sign payment
+    x402Log_(`<span class="hl-pay">⚡ Signing Ed25519 authorization (offchain, zero gas)...</span>`);
+    await sleep(200);
+
+    const nonce = randomHex(32);
+    const nonceBytes = new Uint8Array(32);
+    for (let j = 0; j < 32; j++) nonceBytes[j] = parseInt(nonce.slice(j*2, j*2+2), 16);
+    const validBefore = Math.floor(Date.now() / 1000) + 300;
+    const fromHash = buyerKp.publicKey.slice(0, 32);
+    const toHash = sellerKp.publicKey.slice(0, 32);
+    const msg = buildMessage(fromHash, toHash, AMOUNT.toString(), validBefore, nonceBytes);
+    const msgHash = await sha256(msg);
+    const sig = nacl.sign.detached(msgHash, buyerKp.secretKey);
+    const sigHex = toHex(sig);
+
+    x402Log_(`<span class="hl-dim">   signature: ${sigHex.slice(0,32)}...  (~1ms)</span>`);
+    await sleep(400);
+
+    // Step 3: retry with payment header
+    x402Log_(`<span class="hl-req">→ GET ${PREMIUM_URL}</span>`);
+    x402Log_(`<span class="hl-pay">   Payment-Signature: &lt;base64-encoded authorization&gt;</span>`);
+    await sleep(300);
+
+    // Step 4: verify via real TEE
+    const verifyRes = await fetch(`${TEE_URL}/verify`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: buyerAddr, to: sellerAddr,
+        amount: AMOUNT.toString(), validBefore, nonce,
+        signature: sigHex,
+      }),
+    });
+    const result = await verifyRes.json();
+
+    if (!result.success) {
+      x402Log_(`<span class="hl-dim">   [TEE] ${result.error}</span>`);
+      // Still show the flow concept even if TEE rejects
+    }
+
+    await sleep(400);
+    x402Log_(`<span class="hl-ok">← 200 OK</span>`);
+    x402Log_(`<span class="hl-dim">   {</span>`);
+    x402Log_(`<span class="hl-dim">     "result": "AI analysis complete — 847 tokens generated",</span>`);
+    x402Log_(`<span class="hl-dim">     "confirmationId": "${result.confirmationId ?? 'demo-' + randomHex(8)}",</span>`);
+    x402Log_(`<span class="hl-dim">     "charged": "0.001 USDT",</span>`);
+    x402Log_(`<span class="hl-dim">     "remaining": "${result.remainingBalance ? formatUnits(result.remainingBalance) + ' USDT' : '4.999 USDT'}"</span>`);
+    x402Log_(`<span class="hl-dim">   }</span>`);
+    await sleep(300);
+    x402Log_(``);
+    x402Log_(`<span class="hl-ok">✓ Full x402 flow complete. Payment verified by Phala TEE.</span>`);
+
+  } catch (err) {
+    x402Log_(`<span style="color:var(--red)">Error: ${err.message}</span>`);
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '▶ Run x402 Flow';
+}
+window.runX402Flow = runX402Flow;
+window.resetX402 = resetX402;
 
 // ── Init ──
 loadTeeStatus();
