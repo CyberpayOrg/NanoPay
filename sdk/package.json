@@ -1,0 +1,21 @@
+{
+  "name": "@cyber-nano-pay/sdk",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@ton/core": "~0",
+    "@ton/crypto": "^3.2.0",
+    "@ton/ton": "^13.11.2",
+    "tweetnacl": "^1.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5"
+  }
+}

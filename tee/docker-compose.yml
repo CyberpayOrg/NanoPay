@@ -1,0 +1,22 @@
+# Phala Cloud CVM docker-compose
+# Deploy via: phala deploy -c docker-compose.yml
+services:
+  tee:
+    image: 0xll/cyber-nano-pay-tee:v0.3.7
+    ports:
+      - "4030:4030"
+    volumes:
+      - tee-data:/app/data
+      - /var/run/dstack.sock:/var/run/dstack.sock
+    environment:
+      - PORT=4030
+      - TON_RPC=${TON_RPC:-https://testnet.toncenter.com/api/v2/jsonRPC}
+      - GATEWAY_ADDRESS=${GATEWAY_ADDRESS}
+      - WALLET_MNEMONIC=${WALLET_MNEMONIC}
+      - ADMIN_TOKEN=${ADMIN_TOKEN}
+      - TONCENTER_API_KEY=${TONCENTER_API_KEY:-}
+      - TELEGRAM_BOT_URL=${TELEGRAM_BOT_URL:-}
+      - DB_PATH=/app/data/gateway.db
+
+volumes:
+  tee-data:
