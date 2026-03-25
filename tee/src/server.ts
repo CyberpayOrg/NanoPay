@@ -146,6 +146,8 @@ async function main() {
   app.get("/health", (c) => c.json({ status: "ok", tee: attestation.platform }));
 
   app.get("/debug/dstack", async (c) => {
+    const denied = adminGuard(c);
+    if (denied) return denied;
     const fs = await import("fs");
     const socketPaths = ["/var/run/dstack.sock", "/var/run/tappd.sock"];
     const checks: Record<string, any> = {
@@ -269,6 +271,8 @@ async function main() {
   });
 
   app.post("/approve/:id", async (c) => {
+    const denied = adminGuard(c);
+    if (denied) return denied;
     const id = c.req.param("id");
     const result = await aggregator.approvePayment(id);
     if (result.success) store.updateApproval(id, "approved", "api");
@@ -276,6 +280,8 @@ async function main() {
   });
 
   app.post("/reject/:id", (c) => {
+    const denied = adminGuard(c);
+    if (denied) return denied;
     const id = c.req.param("id");
     const result = aggregator.rejectPayment(id);
     if (result.success) store.updateApproval(id, "rejected", "api");
