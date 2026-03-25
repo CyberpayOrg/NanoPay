@@ -2,6 +2,12 @@
 
 Sub-cent USDT micropayments for AI agents. Zero gas per payment. x402-compatible. TEE-secured. Telegram-native.
 
+## Demo
+
+<video src="docs/demo-video.mp4" controls width="100%"></video>
+
+> 📺 [Live Demo](https://nano.cyberpay.org) · [Pitch Deck](https://nano-deck.cyberpay.org)
+
 ## The Problem
 
 AI agents need to pay for API calls, compute, data, and services — often thousands of times per day at sub-cent amounts. On-chain transactions are too slow and too expensive for this. Existing payment rails don't work for machine-to-machine micropayments.
